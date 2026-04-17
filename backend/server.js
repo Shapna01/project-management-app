@@ -4,7 +4,11 @@ const pool = require("./db");
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:3000",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 app.use(express.json());
 
 
@@ -39,20 +43,6 @@ app.post("/projects", async (req, res) => {
 });
 
 
-app.get("/projects/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const data = await pool.query(
-      "SELECT * FROM projects WHERE id = $1",
-      [id]
-    );
-
-    res.json(data.rows[0]);
-  } catch (err) {
-    res.status(500).json({ error: "Server error" });
-  }
-});
 
 
 app.get("/tasks", async (req, res) => {
@@ -158,23 +148,62 @@ app.get("/dashboard", async (req, res) => {
 
 app.post("/tasks", async (req, res) => {
   try {
-    const { title, status } = req.body;
+    const { title, description, assign_to } = req.body;
 
     const data = await pool.query(
-      `INSERT INTO tasks (title, status)
-       VALUES ($1,$2)
+      `INSERT INTO tasks (title, description, assign_to, status, created_at)
+       VALUES ($1, $2, $3, $4, NOW())
        RETURNING *`,
-      [title, status]
+      [title, description, assign_to, "pending"]
     );
 
     res.json(data.rows[0]);
-
   } catch (err) {
-    console.error("TASK INSERT ERROR:", err.message);
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
 
+app.post("/api/tasks", async (req, res) => {
+  try {
+    const { title, assigned_to } = req.body;
+
+    const result = await pool.query(
+      "INSERT INTO tasks (title, assigned_to) VALUES ($1, $2) RETURNING *",
+      [title, assigned_to]
+    );
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
+app.post("/tasks", async (req, res) => {
+  try {
+    const { title, description, assigned_to, status, time_spent } = req.body;
+
+    const data = await pool.query(
+      `INSERT INTO tasks (title, description, assigned_to, status, time_spent)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING *`,
+      [
+        title,
+        description || "",
+        assigned_to,
+        status || "pending",
+        time_spent || "00:00:00",
+      ]
+    );
+
+    res.json(data.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});   
 const PORT = 5001;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
