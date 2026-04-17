@@ -4,123 +4,178 @@ const pool = require("./db");
 
 const app = express();
 
-
 app.use(cors());
 app.use(express.json());
 
 
 app.get("/projects", async (req, res) => {
   try {
-    const data = await pool.query(`
-      SELECT 
-        p.*,
-        COALESCE(
-          json_agg(DISTINCT pm) FILTER (WHERE pm.id IS NOT NULL),
-          '[]'
-        ) AS team,
-        COUNT(DISTINCT t.id) AS issues
-      FROM projects p
-      LEFT JOIN project_members pm ON p.id = pm.project_id
-      LEFT JOIN tasks t ON p.id = t.project_id
-      GROUP BY p.id
-      ORDER BY p.id DESC
-    `);
-
-    return res.status(200).json(data.rows);
+    const data = await pool.query(
+      "SELECT * FROM projects ORDER BY id DESC"
+    );
+    res.json(data.rows);
   } catch (err) {
-    console.error("❌ PROJECT ERROR FULL:", err);
-
-    return res.status(500).json({
-      error: "Database query failed",
-      details: err.message
-    });
+    res.status(500).json({ error: "Server error" });
   }
 });
+
+
+app.post("/projects", async (req, res) => {
+  try {
+    const { title, description, type, startDate, endDate } = req.body;
+
+    const data = await pool.query(
+      `INSERT INTO projects 
+      (title, description, type, start_date, end_date, status) 
+      VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
+      [title, description, type, startDate, endDate, "On Track"]
+    );
+
+    res.json(data.rows[0]);
+  } catch (err) {
+    console.error("❌ ERROR:", err.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 
 app.get("/projects/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-   const data = await pool.query(`
-  SELECT p.*, 
-  COALESCE(
-    json_agg(DISTINCT pm) FILTER (WHERE pm.id IS NOT NULL), '[]'
-  ) AS team,
-  COUNT(DISTINCT t.id) AS issues
-  FROM projects p
-  LEFT JOIN project_members pm ON p.id = pm.project_id
-  LEFT JOIN tasks t ON p.id = t.project_id
-  GROUP BY p.id
-  ORDER BY p.id DESC
-`);
-
-    if (data.rows.length === 0) {
-      return res.status(404).json({ error: "Project not found" });
-    }
-
-    res.json(data.rows[0]);
-  } catch (err) {
-    console.error("❌ PROJECT ID ERROR:", err.message);
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
-app.post("/projects", async (req, res) => {
-  try {
-    const { title, description } = req.body;
-
     const data = await pool.query(
-      "INSERT INTO projects (title, description, status) VALUES ($1,$2,$3) RETURNING *",
-      [title, description, "On Track"]
+      "SELECT * FROM projects WHERE id = $1",
+      [id]
     );
 
     res.json(data.rows[0]);
   } catch (err) {
-    console.error("❌ CREATE PROJECT ERROR:", err.message);
     res.status(500).json({ error: "Server error" });
   }
 });
 
 
-app.get("/tasks/:projectId", async (req, res) => {
-  try {
-    const { projectId } = req.params;
-
-    const data = await pool.query(
-      "SELECT * FROM tasks WHERE project_id = $1",
-      [projectId]
-    );
-
-    res.json(data.rows);
-  } catch (err) {
-    console.error("❌ TASK ERROR:", err.message);
-    res.status(500).json({ error: "Server error" });
-  }
-});
 app.get("/tasks", async (req, res) => {
   try {
-    const data = await pool.query("SELECT * FROM tasks");
+    const data = await pool.query(
+      "SELECT * FROM tasks ORDER BY id DESC"
+    );
     res.json(data.rows);
   } catch (err) {
-    console.error("❌ TASK ERROR:", err.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await pool.query(
+      "SELECT * FROM users WHERE email = $1",
+      [email]
+    );
+
+    if (user.rows.length === 0) {
+      return res.status(401).json({ error: "User not found" });
+    }
+
+    if (user.rows[0].password !== password) {
+      return res.status(401).json({ error: "Invalid password" });
+    }
+
+    res.json({ message: "Login success", user: user.rows[0] });
+
+  } catch (err) {
+    console.error("❌ LOGIN ERROR:", err.message);
     res.status(500).json({ error: "Server error" });
   }
 });
 
 
 app.get("/", (req, res) => {
-  res.send("API is running ");
+  res.send("API is running");
 });
 
+
+
+app.get("/dashboard", async (req, res) => {
+  try {
+    const { filter } = req.query;
+
+    let dateFilter = "";
+
+    if (filter === "week") {
+      dateFilter = `WHERE start_date >= NOW() - INTERVAL '7 days'`;
+    } else {
+      dateFilter = `WHERE DATE_TRUNC('month', start_date) = DATE_TRUNC('month', NOW())`;
+    }
+
+    const performanceResult = await pool.query(`
+      SELECT 
+        TO_CHAR(start_date, 'Mon') AS month,
+        COUNT(*) AS achieved,
+        AVG(target) AS target
+      FROM projects
+      ${dateFilter}
+      GROUP BY month
+      ORDER BY MIN(start_date)
+    `);
+
+    const performance = performanceResult.rows.map((row) => ({
+      month: row.month,
+      achieved: Number(row.achieved),
+      target: Math.round(row.target || 0),
+    }));
+
+    const worklogResult = await pool.query(`
+      SELECT status AS name, COUNT(*) AS value
+      FROM tasks
+      GROUP BY status
+    `);
+
+    const worklog = worklogResult.rows.map((row) => ({
+      name: row.name,
+      value: Number(row.value),
+    }));
+
+    const taskResult = await pool.query(`
+      SELECT title, status
+      FROM tasks
+      ORDER BY id DESC
+      LIMIT 5
+    `);
+
+    const tasks = taskResult.rows;
+
+    res.json({ performance, worklog, tasks });
+
+  } catch (err) {
+    console.error("DASHBOARD ERROR:", err);
+    res.status(500).json({ error: "Dashboard error" });
+  }
+});
+
+app.post("/tasks", async (req, res) => {
+  try {
+    const { title, status } = req.body;
+
+    const data = await pool.query(
+      `INSERT INTO tasks (title, status)
+       VALUES ($1,$2)
+       RETURNING *`,
+      [title, status]
+    );
+
+    res.json(data.rows[0]);
+
+  } catch (err) {
+    console.error("TASK INSERT ERROR:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 const PORT = 5001;
-
 app.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
-
-app.get("/tasks", async (req, res) => {
-  const data = await pool.query("SELECT * FROM tasks ORDER BY id DESC");
-  res.json(data.rows);
-});
-
