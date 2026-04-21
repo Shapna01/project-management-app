@@ -1,15 +1,19 @@
 const express = require("express");
 const cors = require("cors");
 const pool = require("./db");
-
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
+const JWT_SECRET = "your_secret_key";
 const app = express();
 
 app.use(cors({
   origin: "http://localhost:3000",
-  methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
+
 app.use(express.json());
+
+app.use(cookieParser());
 
 
 app.get("/projects", async (req, res) => {
@@ -59,29 +63,46 @@ app.get("/tasks", async (req, res) => {
 
 app.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { username, password } = req.body;
 
-    const user = await pool.query(
+    // ✅ Validate input
+    if (!username || !password) {
+      return res.status(400).json({ message: "Email & password required" });
+    }
+
+    const result = await pool.query(
       "SELECT * FROM users WHERE email = $1",
-      [email]
+      [username]
     );
 
-    if (user.rows.length === 0) {
-      return res.status(401).json({ error: "User not found" });
+    // ✅ User not found
+    if (result.rows.length === 0) {
+      return res.status(401).json({ message: "User not found" });
     }
 
-    if (user.rows[0].password !== password) {
-      return res.status(401).json({ error: "Invalid password" });
+    const user = result.rows[0];
+
+    // ✅ Password check
+    if (user.password !== password) {
+      return res.status(401).json({ message: "Wrong password" });
     }
 
-    res.json({ message: "Login success", user: user.rows[0] });
+    const token = jwt.sign(
+      { id: user.id, role: user.role || "viewer" },
+      JWT_SECRET
+    );
+
+    res.cookie("jwtToken", token, {
+      httpOnly: true,
+    });
+
+    res.json({ success: true });
 
   } catch (err) {
-    console.error("❌ LOGIN ERROR:", err.message);
-    res.status(500).json({ error: "Server error" });
+    console.error("LOGIN ERROR:", err);  
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
-
 
 app.get("/", (req, res) => {
   res.send("API is running");
@@ -146,23 +167,7 @@ app.get("/dashboard", async (req, res) => {
   }
 });
 
-app.post("/tasks", async (req, res) => {
-  try {
-    const { title, description, assign_to } = req.body;
 
-    const data = await pool.query(
-      `INSERT INTO tasks (title, description, assign_to, status, created_at)
-       VALUES ($1, $2, $3, $4, NOW())
-       RETURNING *`,
-      [title, description, assign_to, "pending"]
-    );
-
-    res.json(data.rows[0]);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
-  }
-});
 
 app.post("/api/tasks", async (req, res) => {
   try {
@@ -204,6 +209,83 @@ app.post("/tasks", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });   
+
+app.get("/profile", authMiddleware, async (req, res) => {
+  try {
+    const user = await pool.query(
+      `SELECT id, name, email, role, location, bio, phone, avatar
+       FROM users WHERE id = $1`,
+      [req.user.id]
+    );
+
+    res.json(user.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+app.put("/profile", authMiddleware, async (req, res) => {
+  try {
+    const { name, location, bio, phone } = req.body;
+
+    await pool.query(
+      `UPDATE users
+       SET name=$1, location=$2, bio=$3, phone=$4
+       WHERE id=$5`,
+      [name, location, bio, phone, req.user.id]
+    );
+
+    res.json({ message: "Profile updated" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+app.get("/users", async (req, res) => {
+  try {
+    const users = await pool.query(
+      "SELECT id, name, avatar FROM users ORDER BY id"
+    );
+
+    res.json(users.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+app.post("/register", async (req, res) => {
+  try {
+    const { name, email, password, role } = req.body;
+
+    if (!name || !email || !password || !role) {
+      return res.status(400).json({ message: "All fields required" });
+    }
+
+    const existing = await pool.query(
+      "SELECT * FROM users WHERE email = $1",
+      [email]
+    );
+
+    if (existing.rows.length > 0) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
+
+    const result = await pool.query(
+      `INSERT INTO users (name, email, password, role)
+       VALUES ($1, $2, $3, $4)
+       RETURNING id, name, email, role`,
+      [name, email, password, role]
+    );
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 const PORT = 5001;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
