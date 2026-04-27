@@ -258,10 +258,10 @@ const renderLabel = ({
       </div>
 
       <p className="text-sm mt-2 font-medium">
-        {project.title}
+        {project.title || "Untitled Project"}
       </p>
       <p className="text-xs text-gray-500 line-clamp-2">
-        {project.description}
+        {project.description || "No description"}
       </p>
     </div>
 

@@ -36,7 +36,7 @@ const [tasks, setTasks] = useState<Task[]>([]);
   const fetchDashboard = async () => {
   try {
     const res = await fetch(
-      `http://localhost:5001/dashboard?filter=${filter}`
+      `http://localhost:5001/api/dashboard?filter=${filter}`
     );
 
     const data: DashboardResponse = await res.json();

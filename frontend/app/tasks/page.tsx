@@ -15,10 +15,11 @@ export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]); 
 
   useEffect(() => {
-    fetch("http://localhost:5001/tasks")
-      .then((res) => res.json())
-      .then((data) => setTasks(data as Task[]));
-  }, []);
+  fetch("http://localhost:5001/api/tasks")
+    .then((res) => res.json())
+    .then((data: Task[]) => setTasks(data))
+    .catch((err) => console.error(err));
+}, []);
 
   return (
     <div className="min-h-screen bg-[#F2F6FF]">

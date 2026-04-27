@@ -42,10 +42,10 @@ export default function Dashboard() {
 
   const fetchData = async (): Promise<void> => {
     try {
-      const res1 = await fetch("http://localhost:5001/projects");
+      const res1 = await fetch("http://localhost:5001/api/projects");
       const projectsData = await res1.json();
 
-      const res2 = await fetch("http://localhost:5001/dashboard");
+      const res2 = await fetch("http://localhost:5001/api/dashboard");
       const dashboardData = await res2.json();
 
       setProjects(Array.isArray(projectsData) ? projectsData : []);

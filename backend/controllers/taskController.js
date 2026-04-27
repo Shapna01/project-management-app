@@ -1,8 +1,13 @@
 const pool = require("../db");
 
 exports.getTasks = async (req, res) => {
-  const data = await pool.query("SELECT * FROM tasks ORDER BY id DESC");
-  res.json(data.rows);
+  try {
+    const data = await pool.query("SELECT * FROM tasks ORDER BY id DESC");
+    res.json(data.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
 };
 
 exports.createTask = async (req, res) => {
