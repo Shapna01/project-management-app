@@ -24,9 +24,6 @@ ChartJS.register(
   LineElement
 );
 
-//
-// ✅ TYPES
-//
 
 type Project = {
   id: number;
@@ -63,10 +60,7 @@ export default function Dashboardwidgets({
   performance = [],
   worklog = [],
 }: Props) {
-  //
-  // ✅ SAFE DATA
-  //
-
+  
   const safeTasks: Task[] = (tasks || []).map((t) => ({
     ...t,
     status: (t.status || "").toLowerCase(),
@@ -74,9 +68,7 @@ export default function Dashboardwidgets({
 
   const safeProjects: Project[] = Array.isArray(projects) ? projects : [];
 
-  //
-  // ✅ COUNTS
-  //
+  
 
   const completed = safeTasks.filter((t) => t.status === "completed").length;
   const onHold = safeTasks.filter((t) => t.status?.includes("hold")).length;
@@ -87,10 +79,7 @@ export default function Dashboardwidgets({
 
   const totalTasks = safeTasks.length;
 
-  //
-  // ✅ CHART DATA
-  //
-
+  
   const taskData = {
     labels: worklog.map((w) => w.name),
     datasets: [
@@ -123,13 +112,9 @@ export default function Dashboardwidgets({
     ],
   };
 
-  //
-  // ✅ UI
-  //
-
+ 
   return (
     <div className="p-4 grid grid-cols-2 mt-16 p-6 gap-5 text-black">
-      {/* Projects */}
       <div className="bg-white shadow rounded-md p-4 h-[320px]">
         <h3 className="font-semibold text-base mb-3">Projects</h3>
 
@@ -151,7 +136,6 @@ export default function Dashboardwidgets({
         </div>
       </div>
 
-      {/* Tasks */}
       <div className="bg-white shadow rounded-md p-4 h-[320px]">
         <div className="flex justify-between mb-3">
           <h3 className="text-base font-semibold">Tasks</h3>
@@ -169,7 +153,6 @@ export default function Dashboardwidgets({
         )}
       </div>
 
-      {/* Work Log */}
       <div className="bg-white shadow rounded-md p-4 h-[320px]">
         <h3 className="text-base font-semibold mb-3">Work Log</h3>
 
@@ -182,7 +165,6 @@ export default function Dashboardwidgets({
         )}
       </div>
 
-      {/* Performance */}
       <div className="bg-white shadow rounded-md p-4 h-[320px]">
         <h3 className="text-base font-semibold mb-3">Performance</h3>
 
