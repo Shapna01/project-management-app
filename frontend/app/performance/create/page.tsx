@@ -30,7 +30,7 @@ export default function CreateTaskPage() {
 
   const handleCreate = async (): Promise<void> => {
   try {
-    const res = await fetch("http://localhost:5001/tasks", {
+    const res = await fetch("http://localhost:5001/api/tasks", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

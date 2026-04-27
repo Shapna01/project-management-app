@@ -23,7 +23,7 @@ export default function AssignTaskPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
 
   useEffect(() => {
-    fetch("http://localhost:5001/tasks")
+    fetch("http://localhost:5001/api/tasks")
       .then((res) => res.json())
       .then((data: Task[]) => setTasks(data));
   }, []);
@@ -34,7 +34,7 @@ export default function AssignTaskPage() {
       return;
     }
 
-    const res = await fetch("http://localhost:5001/tasks", {
+    const res = await fetch("http://localhost:5001/api/tasks", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

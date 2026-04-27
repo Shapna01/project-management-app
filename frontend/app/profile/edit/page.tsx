@@ -17,7 +17,7 @@ export default function EditProfile() {
   const [user, setUser] = useState<User>({});
 
   useEffect(() => {
-    fetch("http://localhost:5001/profile", {
+    fetch("http://localhost:5001/api/profile", {
       credentials: "include",
     })
       .then((res) => res.json())

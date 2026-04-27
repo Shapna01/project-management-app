@@ -23,7 +23,7 @@ export default function RegisterPage() {
   setForm({ ...form, [e.target.name]: e.target.value });
 };
   const register = async () => {
-    const res = await fetch("http://localhost:5001/register", {
+    const res = await fetch("http://localhost:5001/api/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

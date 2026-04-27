@@ -12,7 +12,7 @@ const [description, setDescription] = useState<string>("");
 const router = useRouter();
   const handleCreate = async (): Promise<void> => {
   try {
-    const res = await fetch("http://localhost:5001/projects", {
+    const res = await fetch("http://localhost:5001/api/projects", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

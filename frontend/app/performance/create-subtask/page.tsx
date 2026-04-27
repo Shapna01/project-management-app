@@ -43,7 +43,7 @@ export default function CreateSubTaskPage() {
 
   const handleCreate = async () => {
     try {
-      const res = await fetch("http://localhost:5001/subtasks", {
+      const res = await fetch("http://localhost:5001/api/subtasks", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

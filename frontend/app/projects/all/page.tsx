@@ -25,7 +25,7 @@ type Project = {
   const fetchProjects = (): void => {
     setLoading(true);
 
-    fetch("http://localhost:5001/projects")
+    fetch("http://localhost:5001/api/projects")
       .then(async (res) => {
         if (!res.ok) {
           const text = await res.text();
@@ -64,7 +64,7 @@ type Project = {
     }
 
     try {
-      const res = await fetch("http://localhost:5001/projects", {
+      const res = await fetch("http://localhost:5001/api/projects", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
