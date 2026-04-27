@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const JWT_SECRET = "your_secret_key";
 const app = express();
-
+const authMiddleware = require("./middleware/auth");
 app.use(cors({
   origin: "http://localhost:3000",
   credentials: true
@@ -65,7 +65,6 @@ app.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    // ✅ Validate input
     if (!username || !password) {
       return res.status(400).json({ message: "Email & password required" });
     }
@@ -75,14 +74,12 @@ app.post("/login", async (req, res) => {
       [username]
     );
 
-    // ✅ User not found
     if (result.rows.length === 0) {
       return res.status(401).json({ message: "User not found" });
     }
 
     const user = result.rows[0];
 
-    // ✅ Password check
     if (user.password !== password) {
       return res.status(401).json({ message: "Wrong password" });
     }
