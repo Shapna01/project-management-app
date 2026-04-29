@@ -7,7 +7,7 @@ import { Clock } from "lucide-react";
 type Task = {
   id: number;
   title: string;
-  assign_to?: string;
+  assigned_to?: string;
   status?: string;
   time_spent?: string;
 };
@@ -17,8 +17,18 @@ export default function TasksPage() {
   useEffect(() => {
   fetch("http://localhost:5001/api/tasks")
     .then((res) => res.json())
-    .then((data: Task[]) => setTasks(data))
-    .catch((err) => console.error(err));
+    .then((data) => {
+      if (Array.isArray(data)) {
+        setTasks(data);
+      } else {
+        setTasks([]);
+        console.log("Invalid response:", data);
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      setTasks([]);
+    });
 }, []);
 
   return (
@@ -88,7 +98,7 @@ export default function TasksPage() {
 
                     <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 border border-white shadow-sm">
                       <img
-                        src={`https://i.pravatar.cc/150?u=${task.assign_to}`}
+                        src={`https://i.pravatar.cc/150?u=${task.assigned_to}`}
                         className="w-full h-full object-cover"
                       />
                     </div>
