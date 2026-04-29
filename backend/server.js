@@ -1,123 +1,33 @@
 const express = require("express");
 const cors = require("cors");
-const pool = require("./db");
+const cookieParser = require("cookie-parser");
+
+const authRoutes = require("./routes/authRoutes");
+const projectRoutes = require("./routes/projectRoutes");
+const taskRoutes = require("./routes/taskRoutes");
+const userRoutes = require("./routes/userRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
 const app = express();
 
+app.use(cors({
+  origin: "http://localhost:3000",
+  credentials: true
+}));
 
-app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 
-
-app.get("/projects", async (req, res) => {
-  try {
-    const data = await pool.query(`
-      SELECT 
-        p.*,
-        COALESCE(
-          json_agg(pm) FILTER (WHERE pm.id IS NOT NULL),
-          '[]'
-        ) AS team,
-        COUNT(DISTINCT t.id) AS issues
-      FROM projects p
-      LEFT JOIN project_members pm ON p.id = pm.project_id
-      LEFT JOIN tasks t ON p.id = t.project_id
-      GROUP BY p.id
-      ORDER BY p.id DESC
-    `);
-
-    res.json(data.rows);
-  } catch (err) {
-    console.error("❌ PROJECT ERROR FULL:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.get("/projects/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const data = await pool.query(
-      "SELECT * FROM projects WHERE id = $1",
-      [id]
-    );
-
-    if (data.rows.length === 0) {
-      return res.status(404).json({ error: "Project not found" });
-    }
-
-    res.json(data.rows[0]);
-  } catch (err) {
-    console.error("❌ PROJECT ID ERROR:", err.message);
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
-app.post("/projects", async (req, res) => {
-  try {
-    const { title, description } = req.body;
-
-    const data = await pool.query(
-      "INSERT INTO projects (title, description, status) VALUES ($1,$2,$3) RETURNING *",
-      [title, description, "On Track"]
-    );
-
-    res.json(data.rows[0]);
-  } catch (err) {
-    console.error("❌ CREATE PROJECT ERROR:", err.message);
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
-
-app.get("/tasks/:projectId", async (req, res) => {
-  try {
-    const { projectId } = req.params;
-
-    const data = await pool.query(
-      "SELECT * FROM tasks WHERE project_id = $1",
-      [projectId]
-    );
-
-    res.json(data.rows);
-  } catch (err) {
-    console.error("❌ TASK ERROR:", err.message);
-    res.status(500).json({ error: "Server error" });
-  }
-});
-app.get("/tasks", async (req, res) => {
-  try {
-    const data = await pool.query("SELECT * FROM tasks");
-    res.json(data.rows);
-  } catch (err) {
-    console.error("❌ TASK ERROR:", err.message);
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
-
+app.use("/api/auth", authRoutes);
+app.use("/api/projects", projectRoutes);
+app.use("/api/tasks", taskRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 app.get("/", (req, res) => {
-  res.send("API is running ✅");
+  res.send("API running");
 });
 
-
-const PORT = 5001;
-
-app.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
+app.listen(5001, () => {
+  console.log("Server running on port 5001");
 });
-app.get("/projects/:id/tasks", async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const data = await pool.query(
-      "SELECT * FROM tasks WHERE project_id = $1",
-      [id]
-    );
-
-    res.json(data.rows);
-  } catch (err) {
-    console.error("❌ ERROR:", err.message);
-    res.status(500).json({ error: "Server error" });
-  }
-});
+require("dotenv").config();
