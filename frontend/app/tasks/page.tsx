@@ -62,7 +62,7 @@ export default function TasksPage() {
                     <p className="text-xs text-gray-500 mt-1">
                       #{task.id} Opened few days ago by{" "}
                       <span className="font-semibold">
-                        {task.assign_to || "Unknown"}
+                        {task.assigned_to || "Unknown"}
                       </span>
                     </p>
 
