@@ -1,6 +1,5 @@
 const pool = require("../db");
 const jwt = require("jsonwebtoken");
-
 const JWT_SECRET = "your_secret_key";
 
 exports.login = async (req, res) => {
