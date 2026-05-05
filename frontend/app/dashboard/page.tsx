@@ -37,8 +37,28 @@ export default function Dashboard() {
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+  initKeycloak();
+}, []);
+
+const initKeycloak = async () => {
+  try {
+    const authenticated = await keycloak.init({
+      onLoad: "check-sso",
+      pkceMethod: "S256",
+      checkLoginIframe: false,
+    });
+
+    if (!authenticated) {
+      keycloak.login();
+      return;
+    }
+
+    await fetchData();
+  } catch (err) {
+    console.error("Keycloak init error:", err);
+  }
+};
+
 
   const fetchData = async (): Promise<void> => {
   try {

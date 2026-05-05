@@ -41,6 +41,17 @@ app.get("/", (req, res) => {
   res.send("API running");
 });
 
+app.get("/debug-db", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM projects");
+    console.log("DEBUG RESULT:", result.rows);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("DEBUG ERROR:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.listen(5001, () => {
   console.log("Server running on port 5001");
 });
