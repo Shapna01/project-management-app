@@ -1,6 +1,7 @@
 const pool = require("../db");
 
 exports.getDashboard = async (req, res) => {
+  console.log("🔥 DASHBOARD CONTROLLER HIT");
   try {
     const taskResult = await pool.query(
       "SELECT * FROM tasks ORDER BY id DESC"

@@ -25,7 +25,7 @@ export default function LoginPage() {
       }
     } catch (error) {
       console.error("Keycloak Login Error:", error);
-      alert("Login Failed");
+      alert("Login Failed"); 
     }
   };
 

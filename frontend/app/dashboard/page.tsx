@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import Dashboardwidgets from "../components/dashboardwidgets";
-
+import keycloak from "../lib/keycloak";
 type Project = {
   id: number;
   title: string;
@@ -41,35 +41,49 @@ export default function Dashboard() {
   }, []);
 
   const fetchData = async (): Promise<void> => {
-    try {
-      const res1 = await fetch("http://localhost:5001/api/projects");
-      const projectsData = await res1.json();
+  try {
+    await keycloak.updateToken(30);
 
-      const res2 = await fetch("http://localhost:5001/api/dashboard");
-      const dashboardData = await res2.json();
+    const token = keycloak.token;
 
-      setProjects(Array.isArray(projectsData) ? projectsData : []);
+    const res1 = await fetch("http://localhost:5001/api/projects", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-      setDashboard({
-        tasks: Array.isArray(dashboardData.tasks) ? dashboardData.tasks : [],
-        performance: Array.isArray(dashboardData.performance)
-          ? dashboardData.performance
-          : [],
-        worklog: Array.isArray(dashboardData.worklog)
-          ? dashboardData.worklog
-          : [],
-      });
-    } catch (err) {
-      console.error("Fetch error:", err);
+    const projectsData = await res1.json();
 
-      setProjects([]);
-      setDashboard({
-        tasks: [],
-        performance: [],
-        worklog: [],
-      });
-    }
-  };
+    const res2 = await fetch("http://localhost:5001/api/dashboard", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const dashboardData = await res2.json();
+
+    setProjects(Array.isArray(projectsData) ? projectsData : []);
+
+    setDashboard({
+      tasks: Array.isArray(dashboardData.tasks) ? dashboardData.tasks : [],
+      performance: Array.isArray(dashboardData.performance)
+        ? dashboardData.performance
+        : [],
+      worklog: Array.isArray(dashboardData.worklog)
+        ? dashboardData.worklog
+        : [],
+    });
+  } catch (err) {
+    console.error("Fetch error:", err);
+
+    setProjects([]);
+    setDashboard({
+      tasks: [],
+      performance: [],
+      worklog: [],
+    });
+  }
+};
 
   if (!dashboard) return <p>Loading...</p>;
 

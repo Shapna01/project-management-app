@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
-
+const verifyToken = require("./middleware/verifyToken");
 const { keycloak, memoryStore } = require("./keycloak-config");
 
 const authRoutes = require("./routes/authRoutes");
@@ -32,10 +32,10 @@ app.use(keycloak.middleware());
 
 app.use("/api/auth", authRoutes);
 
-app.use("/api/projects", keycloak.protect(), projectRoutes);
-app.use("/api/tasks", keycloak.protect(), taskRoutes);
-app.use("/api/users", keycloak.protect(), userRoutes);
-app.use("/api/dashboard", keycloak.protect(), dashboardRoutes);
+app.use("/api/projects",  projectRoutes);
+app.use("/api/tasks", taskRoutes);
+app.use("/api/users",userRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 app.get("/", (req, res) => {
   res.send("API running");
