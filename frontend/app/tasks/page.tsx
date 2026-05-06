@@ -38,10 +38,10 @@ export default function TasksPage() {
       <div className="flex">
         <Sidebar />
 
-        <div className="flex-1 ml-64 mt-16 p-6 flex justify-center">
-            <div className="w-full max-w-[1494px]">
+        <div className="flex-1  ml-64 mt-16 p-6 flex justify-center">
+            <div className="w-full  max-w-[1494px]">
 
-          <h1 className="text-2xl font-semibold text-black mb-6">
+          <h1 className="text-2xl  font-semibold text-black mb-6">
             Tasks
           </h1>
 
