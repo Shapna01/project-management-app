@@ -47,66 +47,67 @@ export default function TasksPage() {
 
           <div className="bg-white p-5 rounded-xl shadow-sm">
             {tasks.length === 0 ? (
-              <p>No tasks available</p>
-            ) : (
-              tasks.map((task: Task) => (
-                <div
-                  key={task.id}
-                  className="flex justify-between items-center border rounded-xl p-4 mb-3 hover:shadow-sm transition"
-                >
-                  <div>
-                    <h3 className="font-medium text-black">
-                      {task.title}
-                    </h3>
+  <p>No tasks available</p>
+) : (
+  tasks.map((task: Task) => (
+    <div
+      key={task.id}
+      className={`flex items-stretch rounded-xl mb-3 transition-all duration-200 hover:shadow-md hover:-translate-y-[1px]
+        ${
+          task.status === "completed"
+            ? "border border-green-200 bg-green-50/30"
+            : task.status === "cancelled"
+            ? "border border-red-200 bg-red-50/30"
+            : "border border-gray-200 bg-blue-50/10"
+        }`}
+    >
+      <div
+        className={`w-1.5 rounded-l-xl
+          ${
+            task.status === "completed"
+              ? "bg-green-500"
+              : task.status === "cancelled"
+              ? "bg-red-500"
+              : "bg-blue-200"
+          }`}
+      />
 
-                    <p className="text-xs text-gray-500 mt-1">
-                      #{task.id} Opened few days ago by{" "}
-                      <span className="font-semibold">
-                        {task.assigned_to || "Unknown"}
-                      </span>
-                    </p>
+      <div className="flex justify-between items-center w-full p-4">
+        <div>
+          <h3 className="font-medium text-black">{task.title}</h3>
 
-                    <div className="flex gap-2 mt-2">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          task.status === "cancelled"
-                            ? "bg-red-100 text-red-500"
-                            : "bg-gray-100 text-gray-400"
-                        }`}
-                      >
-                        Cancelled
-                      </span>
+          <p className="text-xs text-gray-500 mt-1">
+            #{task.id} Opened few days ago by{" "}
+            <span className="font-semibold">
+              {task.assigned_to || "Unknown"}
+            </span>
+          </p>
 
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          task.status === "completed"
-                            ? "bg-green-100 text-green-600"
-                            : "bg-gray-100 text-gray-400"
-                        }`}
-                      >
-                        Completed
-                      </span>
-                    </div>
-                  </div>
+          <div className="mt-2">
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-medium ${
+                task.status === "completed"
+                  ? "bg-green-100 text-green-600"
+                  
+                  : task.status === "cancelled"
+                  ? "bg-red-100 text-red-500"
+                  : "bg-blue-100 text-blue-400"
+              }`}
+            >
+              {task.status || "Pending"}
+            </span>
+          </div>
+        </div>
 
-                  <div className="flex items-center gap-3">
-                    
-                    <div className="flex items-center gap-1 text-green-600 text-xs bg-green-50 px-2 py-[4px] rounded-full">
-                      <Clock size={12} />
-                      <span>{task.time_spent || "00:30:00"}</span>
-                    </div>
-
-                    <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 border border-white shadow-sm">
-                      <img
-                        src={`https://i.pravatar.cc/150?u=${task.assigned_to}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-
-                  </div>
-                </div>
-              ))
-            )}
+        <div className="flex items-center gap-3">
+          <div className="text-xs bg-green-50 text-green-600 px-2 py-1 rounded-full">
+            {task.time_spent || "00:30:00"}
+          </div>
+        </div>
+      </div>
+    </div>
+  ))
+)}
           </div>
           </div>
         </div>

@@ -114,68 +114,104 @@ export default function Dashboardwidgets({
 
  
   return (
-    <div className="p-4 grid grid-cols-2 mt-16 p-6 gap-5 text-black">
-      <div className="bg-white shadow rounded-md p-4 h-[320px]">
-        <h3 className="font-semibold text-base mb-3">Projects</h3>
+  <div className="p-4 grid grid-cols-2 mt-16 gap-5 text-black">
 
-        <div className="flex gap-4 overflow-x-auto">
-          {safeProjects.slice(0, 4).map((project) => (
-            <Link href={`/projects/${project.id}`} key={project.id}>
-              <div className="text-center cursor-pointer">
-                <img
-                  src={project.image || "/default.png"}
-                  className="w-[90px] h-[70px] rounded object-cover"
-                  alt={project.title}
-                />
-                <p className="text-xs mt-1 truncate">
-                  {project.title}
-                </p>
-              </div>
-            </Link>
-          ))}
+    <div className="bg-white shadow rounded-md p-4 h-[320px]">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-semibold text-base">
+          Projects
+        </h3>
+
+        <Link
+          href="/projects"
+          className="text-sm text-blue-600 hover:underline"
+        >
+          View All
+        </Link>
+      </div>
+
+      {safeProjects.length === 0 ? (
+  <p className="text-gray-400 text-sm">
+    No projects available
+  </p>
+) : (
+  <div className="grid grid-cols-2 gap-3">
+    {safeProjects.slice(0, 4).map((project) => (
+      <Link
+        href={`/projects/${project.id}`}
+        key={project.id}
+      >
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-2 hover:shadow-md transition duration-200 cursor-pointer flex flex-col items-center">
+
+          <img
+            src={project.image || "/default.png"}
+            alt={project.title}
+            className="w-full h-20 object-cover rounded-md"
+          />
+
+          <h4 className="text-xs font-semibold text-gray-800 mt-2 text-center truncate w-full">
+            {project.title}
+          </h4>
+
         </div>
+      </Link>
+    ))}
+  </div>
+)}
+</div>
+    <div className="bg-white shadow rounded-md p-4 h-[320px]">
+      <div className="flex justify-between mb-3">
+        <h3 className="text-base font-semibold">
+          Tasks
+        </h3>
+
+        <span className="text-xs bg-blue-100 px-2 py-1 rounded">
+          Week
+        </span>
       </div>
 
-      <div className="bg-white shadow rounded-md p-4 h-[320px]">
-        <div className="flex justify-between mb-3">
-          <h3 className="text-base font-semibold">Tasks</h3>
-          <span className="text-xs bg-blue-100 px-2 py-1 rounded">
-            Week
-          </span>
+      {totalTasks === 0 ? (
+        <p className="text-gray-400 text-sm">
+          No data
+        </p>
+      ) : (
+        <div className="flex justify-center items-center h-[230px]">
+          <Pie data={taskData} />
         </div>
-
-        {totalTasks === 0 ? (
-          <p className="text-gray-400 text-sm">No data</p>
-        ) : (
-          <div className="flex justify-center items-center h-[230px]">
-            <Pie data={taskData} />
-          </div>
-        )}
-      </div>
-
-      <div className="bg-white shadow rounded-md p-4 h-[320px]">
-        <h3 className="text-base font-semibold mb-3">Work Log</h3>
-
-        {totalTasks === 0 ? (
-          <p className="text-gray-400 text-sm">No data</p>
-        ) : (
-          <div className="flex justify-center items-center h-[230px]">
-            <Pie data={workLogData} />
-          </div>
-        )}
-      </div>
-
-      <div className="bg-white shadow rounded-md p-4 h-[320px]">
-        <h3 className="text-base font-semibold mb-3">Performance</h3>
-
-        {performance.length === 0 ? (
-          <p className="text-gray-400 text-sm">No data</p>
-        ) : (
-          <div className="flex justify-center items-center h-[230px]">
-            <Line data={lineData} />
-          </div>
-        )}
-      </div>
+      )}
     </div>
-  );
-}
+
+    <div className="bg-white shadow rounded-md p-4 h-[320px]">
+      <h3 className="text-base font-semibold mb-3">
+        Work Log
+      </h3>
+
+      {totalTasks === 0 ? (
+        <p className="text-gray-400 text-sm">
+          No data
+        </p>
+      ) : (
+        <div className="flex justify-center items-center h-[230px]">
+          <Pie data={workLogData} />
+        </div>
+      )}
+    </div>
+
+    <div className="bg-white shadow rounded-md p-4 h-[320px]">
+      <h3 className="text-base font-semibold mb-3">
+        Performance
+      </h3>
+
+      {performance.length === 0 ? (
+        <p className="text-gray-400 text-sm">
+          No data
+        </p>
+      ) : (
+        <div className="flex justify-center items-center h-[230px]">
+          <Line data={lineData} />
+        </div>
+      )}
+    </div>
+
+  </div>
+);}

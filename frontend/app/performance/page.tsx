@@ -136,14 +136,14 @@ setTasks(data.tasks ?? []);
 
       <div className="grid grid-cols-2 gap-6">
 
-        <div className="bg-white p-6 rounded-2xl shadow-sm">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
           <h2 className="text-lg font-semibold text-black mb-4">
             Performance Report
           </h2>
           <ReactECharts option={lineOption} style={{ height: 300 }} />
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow-sm">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
           <div className="flex justify-between mb-4">
             <h2 className="text-lg font-semibold text-black">
               Work Log
@@ -152,11 +152,11 @@ setTasks(data.tasks ?? []);
             <div className="flex gap-2">
               <button
                 onClick={() => setFilter("week")}
-                className={`px-3 py-1 text-xs rounded ${
-                  filter === "week"
-                    ? "bg-blue-100 text-blue-600"
-                    : "bg-gray-200"
-                }`}
+                className={`px-3 py-1 text-xs rounded-md font-medium transition ${
+  filter === "week"
+    ? "bg-blue-100 text-blue-600"
+    : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+}`}
               >
                 This Week
               </button>
@@ -179,8 +179,8 @@ setTasks(data.tasks ?? []);
 
       </div>
 
-      <div className="mt-6 bg-white p-6 rounded-xl shadow">
-        <h2 className="mb-4 font-semibold text-black">Recent Tasks</h2>
+      <div className="mt-6 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <h2 className="mb-4 font-semibold text-gray-800 text-lg">Recent Tasks</h2>
 
         {tasks.length === 0 ? (
           <p className="text-gray-400 text-sm">No tasks found</p>
@@ -188,18 +188,18 @@ setTasks(data.tasks ?? []);
           tasks.map((task: Task, i: number) => (
             <div
               key={i}
-              className="flex justify-between border-b py-2 text-sm"
+              className="flex justify-between items-center px-4 py-3 rounded-lg hover:bg-gray-50 transition"
             >
               <span className="text-black">{task.title}</span>
               <span
-                className={`${
-                  task.status === "Completed"
-                    ? "text-green-600"
-                    : task.status === "Pending"
-                    ? "text-red-500"
-                    : "text-yellow-500"
-                }`}
-              >
+  className={`px-3 py-1 text-xs font-medium rounded-full ${
+    task.status === "Completed"
+      ? "bg-green-100 text-green-600"
+      : task.status === "Pending"
+      ? "bg-red-100 text-red-500"
+      : "bg-yellow-100 text-yellow-600"
+  }`}
+>
                 {task.status}
               </span>
             </div>

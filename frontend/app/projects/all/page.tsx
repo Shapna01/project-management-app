@@ -113,24 +113,54 @@ type Project = {
             ) : projects.length === 0 ? (
               <p>No projects found</p>
             ) : (
-              projects.map((project) => (
-                <Link href={`/projects/${project.id}`} key={project.id}>
-                  <div className="bg-white p-5 rounded-xl shadow hover:shadow-md cursor-pointer">
-                    <h2 className="font-semibold text-lg">
-                      {project.title}
-                    </h2>
+  projects.map((project) => (
+    <Link href={`/projects/${project.id}`} key={project.id}>
+      <div className="flex bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-[2px] transition-all duration-200 cursor-pointer">
+        
+        <div
+          className={`w-1.5 rounded-l-2xl ${
+            project.status === "completed"
+              ? "bg-blue-200"
+              : project.status === "cancelled"
+              ? "bg-red-500"
+              : "bg-blue-200"
+          }`}
+        />
 
-                    <p className="text-sm text-gray-500">
-                      {project.description}
-                    </p>
+        <div className="p-5 w-full">
+          
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="font-semibold text-lg">
+              {project.title}
+            </h2>
 
-                    <p className="text-xs text-gray-400 mt-2">
-                      {Number(project.issues || 0)} issues
-                    </p>
-                  </div>
-                </Link>
-              ))
-            )}
+            <span
+              className={`text-xs px-2 py-1 rounded-full font-medium ${
+                project.status === "completed"
+                  ? "bg-green-100 text-green-600"
+                  : project.status === "cancelled"
+                  ? "bg-red-100 text-red-500"
+                  : "bg-blue-100 text-blue-600"
+              }`}
+            >
+              {project.status}
+            </span>
+          </div>
+
+          <p className="text-sm text-gray-500">
+            {project.description}
+          </p>
+
+          <p className="text-xs text-gray-400 mt-2">
+            {Number(project.issues || 0)} issues
+          </p>
+
+        </div>
+      </div>
+    </Link>
+  ))
+)
+}
           </div>
 
           {showModal && (

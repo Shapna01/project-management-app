@@ -56,9 +56,8 @@ export default function EditProfile() {
           <div className="w-[260px] bg-white rounded-2xl shadow-md p-5 text-center">
             <div className="w-28 h-28 mx-auto rounded-full border-[4px] border-pink-500 overflow-hidden">
               <img
-  src={user?.avatar || "https://i.pravatar.cc/150?img=5"}
-  className="w-full h-full object-cover"
-/>
+              src={user?.avatar || "https://i.pravatar.cc/150?img=5"}
+              className="w-full h-full object-cover"/>
             </div>
 
             <h2 className="mt-4 font-semibold">{user.name}</h2>
